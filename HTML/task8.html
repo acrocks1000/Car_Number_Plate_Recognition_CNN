@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<title> Car Number Plate Recognition </title>
+<head>
+    <link rel="Website icon" type="image/png" href="web-car.png" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia">
+    <meta name="viewport" content="width:device-width, initial-scale=1.0">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        div.bgImage {
+            background-image: url(carwall.jpg);
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            filter: blur(6px);
+            height: 100%;
+        }
+        h1.headerMain {
+            text-align: center;
+            font-family: "Sofia", sans-serif;
+            text-shadow: 3px 3px 3px #ffffff;
+            font-size: 3.5vw;
+            color: rgb(0, 0, 0)
+        }
+        .mainBody {
+            background-color: rgb(255, 255, 255); /* Fallback color */
+            background-color: rgba(255, 255, 255, 0.4); /* Black w/opacity/see-through */
+            color: rgb(0, 0, 0);
+            font-weight: bold;
+            border: 3px solid #f1f1f1;
+            position: absolute;
+            top: 50% ;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            width: 80%;
+            padding: 0 20px;
+            text-align: center;
+            min-height: 50vh;
+        }
+        .button1 {
+            padding: 0.5rem 0.8rem;
+            border: 0px;
+            border-radius: 0.3rem;
+            background-color: rgb(255, 255, 255);
+            color:rgb(0, 0, 0);
+            margin: 0 0.5rem;
+            transition-duration: 0.4s;
+        }
+        .button1:hover {
+            background-color:rgba(0,0,0, 0.4);
+            color: white;
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24);
+        }
+        .containdisp {
+            background-color: rgba(0, 0, 0, 0.418);
+            color: rgb(255, 255, 255);
+            border-radius: 5px;
+            border: 2px solid #292928;
+            padding: 2%; 
+            width: 55%;
+            margin: 5% 2%;
+            margin-left: 40%; 
+            min-height: 300px;
+	        max-height: 300px;
+	        overflow-y: scroll;
+  	        overflow-x: auto;
+	        text-align: justify !important;
+        }
+        .containdisp::-webkit-scrollbar {
+            width: 10px;
+        }
+        .containdisp::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            box-shadow: inset 0 0 5px grey; 
+            border-radius: 10px;
+        }
+        .containdisp::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 10px;
+        }
+        .containdisp::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+        .Imgdisp {
+            width: 35%;
+            margin: 3.5% 2%;
+            min-height: 300px;
+            float: left;
+	    border-radius: 5px;
+        }
+        .img1 {
+	    border: 5px solid white;
+            border-radius: 5px;
+            max-width: 25vw;
+            max-height: 300px;
+        }
+        label {
+            background-color: indigo;
+            color: white;
+            padding: 0.5rem 0.8rem;
+            font-family: sans-serif;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .file-chosen{
+            margin-left: 0.3rem;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+
+
+
+<body>
+    <div class="bgImage"></div>
+    <div class="mainBody">
+    <h1 class="headerMain"> Object Recognition Using CNN Model </h1>
+
+    <hr style="margin:20px" color="white"/>
+
+    <input type="submit" class="button1" style="float: right; margin-right: 25%; margin-left: -25%;"  value="Submit" onClick="cgi()" />
+    <form name="myform" onsubmit="return false" enctype = "multipart/form-data" action = "../cgi-bin/upload.py" target="_self"  method = "POST">
+        <input type = "file" name = "filename" id="actual-btn" hidden/>
+        <label for="actual-btn">Choose File</label>
+        <span class="file-chosen" id="file-chosen">No file chosen</span>
+        <input type = "submit" value = "Upload" class="button1" id="upbtn" onclick="func()"/>
+	</form>
+
+    <hr style="margin:20px" color="white"/>
+
+    <div class="Imgdisp"><img src="cardriving.gif" alt="CAR" id="img1" class="img1"/></div>
+    <div class="containdisp"> <div id="out" >RESULT</div><br>
+        <pre style="display: inline-block"><div id = "license_details"></div></pre>
+    </div>
+    </div>
+ <script>
+        actualBtn = document.getElementById('actual-btn');
+        fileChosen = document.getElementById('file-chosen');
+        imgupload = document.getElementById('img1');
+        actualBtn.addEventListener('change', function(){
+            fileChosen.textContent = this.files[0].name
+        })
+
+		function func(){
+			var l =document.getElementById("upbtn").value
+			console.log(l)
+			var file=document.forms["myform"]["filename"].files[0]
+            var data = new FormData();
+			data.append('filename', file);
+            var xhr = new XMLHttpRequest();
+			xhr.open('POST', 'http://192.168.225.53/cgi-bin/upload.py', true);
+			xhr.onload = function () {
+    		    console.log(this.responseText);
+			    document.getElementById("license_details").innerHTML=this.responseText
+			    imgupload.src= "cardriving.gif"
+			};
+			xhr.send(data);
+        }
+
+		function cgi(){
+		    url1 = "/carpix/"+fileChosen.textContent
+		    imgupload.src = url1
+		    document.getElementById("license_details").innerHTML= " Please wait while we fetch the car registration details for you ... "
+            console.log('test')
+            var xhr= new XMLHttpRequest();
+            xhr.open("GET","http://192.168.225.53/cgi-bin/license_rec.py", true);
+            xhr.send();
+            xhr.onload= function(){
+                console.log("onload")
+                var output= xhr.responseText;
+                console.log(output)
+                document.getElementById("license_details").innerHTML= output
+                }
+        }
+    </script>
+</body>
